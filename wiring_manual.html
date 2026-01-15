@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Sprinkling System - Wiring Manual</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-left: 5px solid #e74c3c;
+            padding-left: 10px;
+        }
+
+        h3 {
+            color: #16a085;
+            margin-top: 20px;
+        }
+
+        .alert {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #2c3e50;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .pin-map {
+            font-family: monospace;
+            background: #f4f6f7;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        .component-box {
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            background: #fafafa;
+        }
+
+        @media print {
+            body {
+                max-width: 100%;
+                padding: 0;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            h2 {
+                font-size: 18px;
+                margin-top: 15px;
+            }
+
+            .alert {
+                border: 1px solid #000;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Intelligent Sprinkling System</h1>
+    <p style="text-align:center; font-size:1.2em;">Complete Hardware Connection Manual</p>
+    <p style="text-align:center;"><strong>Date:</strong> 2026-01-15 | <strong>Version:</strong> 1.0</p>
+
+    <div class="alert danger">
+        ⚠️ <strong>CRITICAL POWER RULES</strong><br>
+        1. <strong>COMMON GROUND:</strong> You MUST connect the Battery GND, Pi GND, Relay GND, and Servo GND
+        together.<br>
+        2. <strong>SERVO POWER:</strong> NEVER power the Servo Motor directly from the Raspberry Pi. Use an external 6V
+        source.<br>
+        3. <strong>PUMP ISOLATION:</strong> The Pump is inductive. Always use a Relay Module to protect the Pi.
+    </div>
+
+    <h2>1. Raspberry Pi Pinout Reference</h2>
+    <p>We use the following specific GPIO pins for this project. Please ensure you are connecting to the physical pin
+        numbers correctly.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Signal Type</th>
+                <th>RPi Pin Name (BCM)</th>
+                <th>Physical Pin #</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>3.3V Power</strong></td>
+                <td>Power</td>
+                <td>3v3 Power</td>
+                <td><span class="pin-map">Pin 1</span></td>
+            </tr>
+            <tr>
+                <td><strong>5V Power</strong></td>
+                <td>Power</td>
+                <td>5v Power</td>
+                <td><span class="pin-map">Pin 2 or 4</span></td>
+            </tr>
+            <tr>
+                <td><strong>I2C Data (SDA)</strong></td>
+                <td>Data</td>
+                <td>GPIO 02</td>
+                <td><span class="pin-map">Pin 3</span></td>
+            </tr>
+            <tr>
+                <td><strong>I2C Clock (SCL)</strong></td>
+                <td>Clock</td>
+                <td>GPIO 03</td>
+                <td><span class="pin-map">Pin 5</span></td>
+            </tr>
+            <tr>
+                <td><strong>Ground</strong></td>
+                <td>GND</td>
+                <td>Ground</td>
+                <td><span class="pin-map">Pin 6, 9, 14...</span></td>
+            </tr>
+            <tr>
+                <td><strong>DHT22 Sensor</strong></td>
+                <td>Digital In</td>
+                <td>GPIO 04</td>
+                <td><span class="pin-map">Pin 7</span></td>
+            </tr>
+            <tr>
+                <td><strong>Servo Motor</strong></td>
+                <td>PWM Out</td>
+                <td>GPIO 18</td>
+                <td><span class="pin-map">Pin 12</span></td>
+            </tr>
+            <tr>
+                <td><strong>Water Pump</strong></td>
+                <td>Digital Out</td>
+                <td>GPIO 23</td>
+                <td><span class="pin-map">Pin 16</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h2>2. Sensor Connections (Inputs)</h2>
+
+    <div class="component-box">
+        <h3>🌱 A. Soil Moisture Sensor (via ADS1115)</h3>
+        <p>The Raspberry Pi cannot read analog signals directly. We use the ADS1115 Analog-to-Digital Converter.</p>
+
+        <strong>Wiring Table:</strong>
+        <table>
+            <thead>
+                <tr>
+                    <th>From (Component)</th>
+                    <th>To (RPi / Power)</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Moisture Sensor VCC</td>
+                    <td>3.3V</td>
+                    <td>Power for probe</td>
+                </tr>
+                <tr>
+                    <td>Moisture Sensor GND</td>
+                    <td>GND</td>
+                    <td>Common Ground</td>
+                </tr>
+                <tr>
+                    <td>Moisture Sensor A0 (Signal)</td>
+                    <td>ADS1115 (Pin A0)</td>
+                    <td>Analog Signal</td>
+                </tr>
+                <tr style="background:#e8f8f5;">
+                    <td><strong>ADS1115 VCC</strong></td>
+                    <td><strong>RPi Pin 1 (3.3V)</strong></td>
+                    <td>Power for ADC Chip</td>
+                </tr>
+                <tr style="background:#e8f8f5;">
+                    <td><strong>ADS1115 GND</strong></td>
+                    <td><strong>RPi Pin 9 (GND)</strong></td>
+                    <td>Chip Ground</td>
+                </tr>
+                <tr style="background:#e8f8f5;">
+                    <td><strong>ADS1115 SDA</strong></td>
+                    <td><strong>RPi Pin 3 (GPIO 2)</strong></td>
+                    <td>I2C Data Line</td>
+                </tr>
+                <tr style="background:#e8f8f5;">
+                    <td><strong>ADS1115 SCL</strong></td>
+                    <td><strong>RPi Pin 5 (GPIO 3)</strong></td>
+                    <td>I2C Clock Line</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <h3>🌡️ B. Temperature & Humidity (DHT22)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>DHT22 Pin</th>
+                    <th>Connection</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Pin 1 (VCC)</td>
+                    <td>RPi 3.3V (Pin 1)</td>
+                </tr>
+                <tr>
+                    <td>Pin 2 (DATA)</td>
+                    <td>RPi GPIO 4 (Pin 7)</td>
+                </tr>
+                <tr>
+                    <td>Pin 3 (NC)</td>
+                    <td>Not Connected</td>
+                </tr>
+                <tr>
+                    <td>Pin 4 (GND)</td>
+                    <td>RPi GND (Pin 6)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <h2>3. Actuator Connections (Outputs)</h2>
+
+    <div class="component-box">
+        <h3>🤖 A. Servo Motor (Robotic Arm)</h3>
+        <div class="alert danger">
+            <strong>WARNING:</strong> Requires External Power (Buck Converter to 6V).
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Servo Wire Color</th>
+                    <th>Function</th>
+                    <th>Connection</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span style="color:red; font-weight:bold;">Red</span> Or Orange</td>
+                    <td>Power (+)</td>
+                    <td><strong>External 6V Source (+)</strong></td>
+                </tr>
+                <tr>
+                    <td><span style="color:#795548; font-weight:bold;">Brown</span> Or Black</td>
+                    <td>Ground (-)</td>
+                    <td><strong>Shared GND</strong> (Connect to Battery (-) AND Pi GND)</td>
+                </tr>
+                <tr>
+                    <td><span style="color:#f1c40f; font-weight:bold;">Yellow</span> Or White</td>
+                    <td>Signal (PWM)</td>
+                    <td><strong>RPi GPIO 18 (Pin 12)</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <h3>💧 B. Water Pump (via Relay)</h3>
+        <p>The Relay acts as a switch. Logic Side connects to Pi, Load Side connects to Pump/Battery.</p>
+
+        <strong>Logic Side (Low Voltage):</strong>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Relay VCC</td>
+                    <td>RPi 5V (Pin 2)</td>
+                </tr>
+                <tr>
+                    <td>Relay GND</td>
+                    <td>RPi GND (Pin 9)</td>
+                </tr>
+                <tr>
+                    <td>Relay IN</td>
+                    <td>RPi GPIO 23 (Pin 16)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+        <strong>Load Side (High Power):</strong>
+        <table>
+            <tbody>
+                <tr>
+                    <td><strong>Battery (+)</strong></td>
+                    <td>To <strong>Pump (+)</strong> directly</td>
+                </tr>
+                <tr>
+                    <td><strong>Pump (-)</strong></td>
+                    <td>To Relay <strong>COM</strong> pin</td>
+                </tr>
+                <tr>
+                    <td><strong>Battery (-)</strong></td>
+                    <td>To Relay <strong>NO</strong> (Normally Open) pin</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <h3>🚜 C. Chassis Drive Motors (L298N Driver)</h3>
+        <p>To move the robot, we use an L298N Motor Driver to control two DC motors (Left & Right).</p>
+
+        <strong>L298N Module -> Power & Motors:</strong>
+        <table>
+            <tbody>
+                <tr>
+                    <td><strong>12V In</strong></td>
+                    <td>Battery (+)</td>
+                </tr>
+                <tr>
+                    <td><strong>GND</strong></td>
+                    <td><strong>Common Ground</strong> (Battery - AND Pi GND)</td>
+                </tr>
+                <tr>
+                    <td><strong>5V Out</strong></td>
+                    <td>Not Connected (If Pi has its own power)</td>
+                </tr>
+                <tr>
+                    <td><strong>OUT 1 & 2</strong></td>
+                    <td>Left Motor Wires</td>
+                </tr>
+                <tr>
+                    <td><strong>OUT 3 & 4</strong></td>
+                    <td>Right Motor Wires</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <br>
+        <strong>L298N -> Raspberry Pi GPIO:</strong>
+        <table>
+            <thead>
+                <tr>
+                    <th>L298N Pin</th>
+                    <th>RPi GPIO Pin</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>IN1</td>
+                    <td>GPIO 5 (Pin 29)</td>
+                    <td>Left Motor Fwd</td>
+                </tr>
+                <tr>
+                    <td>IN2</td>
+                    <td>GPIO 6 (Pin 31)</td>
+                    <td>Left Motor Rev</td>
+                </tr>
+                <tr>
+                    <td>IN3</td>
+                    <td>GPIO 13 (Pin 33)</td>
+                    <td>Right Motor Fwd</td>
+                </tr>
+                <tr>
+                    <td>IN4</td>
+                    <td>GPIO 19 (Pin 35)</td>
+                    <td>Right Motor Rev</td>
+                </tr>
+                <tr>
+                    <td>ENA / ENB</td>
+                    <td>Keep Jumpers On</td>
+                    <td>Enable Motors (Max Speed)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <h2>4. Power Distribution System</h2>
+    <p>Using a central Li-Ion/Li-Po Battery Pack with BMS.</p>
+
+    <h3>Block Diagram</h3>
+    <pre style="background:#eee; padding:10px; border-radius:5px;">
+[ BATTERY ] ====> [ BMS Board ]
+                       ||
+                       ||==> [ Buck Converter 1 (5V) ] ===> Powers RASPBERRY PI
+                       ||
+                       ||==> [ Buck Converter 2 (6V) ] ===> Powers SERVO MOTOR
+                       ||
+                       ||==> [ Direct Connection ] =======> RELAY COM (For Pump)
+    </pre>
+
+</body>
+
+</html>

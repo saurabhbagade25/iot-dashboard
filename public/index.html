@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intelligent Sprinkling System – Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/robot.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- LOGIN PAGE -->
+    <div class="login-bg" id="loginBg"></div>
+    <div class="login-container" id="loginPage">
+
+        <div style="position:absolute; top:20px; right:20px;">
+            <button class="nav-btn fade-in" onclick="toggleLanguage()" id="loginLangBtn"
+                style="background:rgba(255,255,255,0.2); backdrop-filter:blur(5px); color:white; border:1px solid rgba(255,255,255,0.3);">
+                🌐 EN/MR
+            </button>
+        </div>
+
+        <div class="login-card glass-panel slide-up">
+            <div class="brand-large">
+                <i class="fa-solid fa-leaf text-green-400"></i> <span class="text-white">Team Agrosense</span>
+            </div>
+            <h3 data-i18n="loginTitle" style="color:white; margin:10px 0; font-weight:600;">Welcome Back</h3>
+            <p data-i18n="loginSubtitle" style="color:rgba(255,255,255,0.8); font-size:14px; margin-bottom:30px;">Sign
+                in to monitor your field</p>
+
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="username" placeholder="Username" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="password" placeholder="Password">
+                <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePasswordVisibility(this)"
+                    style="left:auto; right:15px; cursor:pointer;"></i>
+            </div>
+
+            <button class="btn-primary ripple" onclick="handleAuth()" id="authBtn"
+                style="width:100%; margin-top:15px; padding:12px; font-weight:600; letter-spacing:0.5px;">
+                <span data-i18n="btnLogin">Login</span> <i class="fa-solid fa-arrow-right" style="margin-left:8px;"></i>
+            </button>
+
+            <p style="text-align:center; margin-top:15px; font-size:13px; color:rgba(255,255,255,0.7);">
+                <span id="authToggleText">New user?</span>
+                <a href="#" onclick="toggleAuthMode()" style="color:#fff; font-weight:bold; text-decoration:none;"
+                    id="authToggleLink">Create Account</a>
+            </p>
+
+            <p id="loginError"
+                style="color:#ff5252; font-size:13px; margin-top:15px; display:none; background:rgba(255,0,0,0.1); padding:5px; border-radius:4px;">
+                <i class="fa-solid fa-circle-exclamation"></i> Invalid Credentials
+            </p>
+        </div>
+    </div>
+
+    <div class="app-container" id="mainApp" style="display:none;">
+        <aside class="sidebar-nav">
+            <div class="brand">
+                <i class="fa-solid fa-leaf"></i> <span>Team Agrosense</span>
+            </div>
+            <nav>
+                <button class="nav-btn active" onclick="showPage('home')" id="btn-home">
+                    <i class="fa-solid fa-house"></i> <span data-i18n="navHome">Home</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('dashboard')" id="btn-dashboard">
+                    <i class="fa-solid fa-chart-line"></i> <span data-i18n="navDashboard">Dashboard</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('live')" id="btn-live">
+                    <i class="fa-solid fa-video"></i> <span data-i18n="navLive">Live Activity</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('components')" id="btn-components">
+                    <i class="fa-solid fa-microchip"></i> <span data-i18n="navComponents">Components</span>
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <h1 data-i18n="appTitle">Intelligent Sprinkling System</h1>
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <button class="nav-btn" onclick="toggleLanguage()" id="langBtn"
+                        style="padding:4px 10px; font-size:12px;">
+                        🌐 EN/MR
+                    </button>
+                    <div class="system-status">
+                        <span class="status-indicator"></span> <span data-i18n="systemLabel">System:</span> <span
+                            id="systemState">Active</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- HOME PAGE -->
+            <section id="homePage" class="page-section fade-in">
+                <div class="home-grid">
+                    <!-- Welcome & Weather -->
+                    <div class="welcome-card glass-panel text-white"
+                        style="background: linear-gradient(135deg, var(--primary), #1b5e20);">
+                        <div style="flex:1">
+                            <h2 style="margin:0; font-size:24px;" data-i18n="greeting">🌱 Good Morning!</h2>
+                            <p style="opacity:0.9; margin-top:5px;" data-i18n="systemSummary">System is running
+                                optimally. Here is your farm
+                                summary.</p>
+                            <div style="margin-top:20px;">
+                                <button class="btn-light" onclick="showPage('live')" data-i18n="viewLiveFeed">View
+                                    Live
+                                    Feed</button>
+                            </div>
+                        </div>
+                        <div class="weather-widget">
+                            <i class="fa-solid fa-cloud-sun sun-anim" style="font-size:48px;"></i>
+                            <div style="text-align:right;">
+                                <div style="font-size:32px; font-weight:bold;">24°C</div>
+                                <div style="font-size:12px; opacity:0.9;" data-i18n="weatherDesc">Sunny • Humidity
+                                    45%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Metrics -->
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon" style="background:#e3f2fd; color:#1976d2;"><i
+                                class="fa-solid fa-droplet"></i></div>
+                        <div>
+                            <div class="metric-label" data-i18n="avgMoisture">Avg Soil Moisture</div>
+                            <div class="metric-value">62%</div>
+                            <div class="metric-trend good"><i class="fa-solid fa-arrow-up"></i> <span
+                                    data-i18n="trendMoisture">2% vs yesterday</span></div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon" style="background:#e8f5e9; color:#2e7d32;"><i
+                                class="fa-solid fa-seedling"></i></div>
+                        <div>
+                            <div class="metric-label" data-i18n="plantHealth">Plant Health</div>
+                            <div class="metric-value">98%</div>
+                            <div class="metric-trend good" data-i18n="statusStable">Stable condition</div>
+                        </div>
+                    </div>
+                    <div class="metric-card glass-panel">
+                        <div class="metric-icon" style="background:#fff3e0; color:#f57c00;"><i
+                                class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div>
+                            <div class="metric-label" data-i18n="activeAlerts">Active Alerts</div>
+                            <div class="metric-value">0</div>
+                            <div class="metric-trend" data-i18n="statusNominal">All systems nominal</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="glass-panel" style="grid-column: span 2;">
+                        <h3 data-i18n="quickActions">⚡ Quick Actions</h3>
+                        <div class="action-grid">
+                            <button class="action-btn" onclick="triggerAction('All Sprinklers ON')">
+                                <i class="fa-solid fa-faucet-drip"></i>
+                                <span data-i18n="actInject">Inject Water</span>
+                            </button>
+                            <button class="action-btn" onclick="triggerAction('System Calibration')">
+                                <i class="fa-solid fa-compass"></i>
+                                <span data-i18n="actCalibrate">Calibrate Sensors</span>
+                            </button>
+                            <button class="action-btn" onclick="triggerAction('Drone Patrol')">
+                                <i class="fa-solid fa-helicopter"></i>
+                                <span data-i18n="actPatrol">Start Patrol</span>
+                            </button>
+                            <button class="action-btn warning" onclick="triggerAction('Emergency Stop')">
+                                <i class="fa-solid fa-power-off"></i>
+                                <span data-i18n="actStop">Emergency Stop</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Logs -->
+                    <div class="glass-panel" style="grid-column: span 1; grid-row: span 2;">
+                        <h3 data-i18n="systemActivity">📋 System Activity</h3>
+                        <ul id="logList" class="timeline-logs">
+                            <li data-i18n="loadingLogs">Loading logs...</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DASHBOARD PAGE -->
+            <section id="dashboardPage" class="page-section" style="display:none;">
+                <div class="glass-panel control-panel">
+                    <div class="control-group">
+                        <label>Beds</label>
+                        <input type="number" id="beds" value="2" min="1" max="10">
+                    </div>
+                    <div class="control-group">
+                        <label>Plants/Bed</label>
+                        <input type="number" id="plants" value="6" min="1" max="20">
+                    </div>
+                    <div class="control-group">
+                        <label>Plant Size</label>
+                        <input type="range" id="plantSize" min="16" max="60" value="28"
+                            oninput="updatePlantSize(this.value)">
+                        <span id="sizeValue">28px</span>
+                    </div>
+                    <div class="control-group" style="flex-grow:2; min-width:200px;">
+                        <label>Camera URL</label>
+                        <input type="text" id="cameraUrl" placeholder="http://192.168.0.x:8080/?action=stream"
+                            style="width:100%;">
+                    </div>
+                    <button class="btn-primary" onclick="generateFarmAndSave()">
+                        <i class="fa-solid fa-rotate"></i> Update Layout
+                    </button>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="farm-area glass-panel" id="farm">
+                        <!-- Farm layout generated here -->
+                    </div>
+
+                    <!-- New Slide-Over Sidebar -->
+                    <div class="details-sidebar" id="detailsSidebar">
+                        <div class="sidebar-header">
+                            <h3 id="plantName" style="margin:0;"><i class="fa-solid fa-seedling"></i> Plant Details
+                            </h3>
+                            <div style="display:flex; gap:10px;">
+                                <button class="close-btn" onclick="toggleEditMode()" title="Edit Data"><i
+                                        class="fa-solid fa-pen"></i></button>
+                                <button class="close-btn" onclick="closeSidebar()"><i
+                                        class="fa-solid fa-times"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="comparison-view">
+                            <div class="comp-img-box">
+                                <img id="refImg" class="comp-img ref" src="" alt="Reference">
+                                <span>Reference (Healthy)</span>
+                            </div>
+                            <div class="comp-img-box" style="position:relative;">
+                                <img id="liveScanImg" class="comp-img live" src="" alt="Scan">
+                                <div class="scan-overlay"></div>
+                                <span>Live Scan <span
+                                        style="font-size:9px; color:var(--primary);">(Analysing...)</span></span>
+                            </div>
+                        </div>
+
+                        <div class="ai-analysis"
+                            style="background:#f4f6f8; padding:10px; border-radius:8px; margin-bottom:15px;">
+                            <div
+                                style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
+                                <span>AI Confidence Score</span>
+                                <b id="aiConfidence">--%</b>
+                            </div>
+                            <div class="progress-bar-bg"
+                                style="width:100%; height:6px; background:#ddd; border-radius:3px; overflow:hidden;">
+                                <div class="progress-bar-fill" id="aiConfidenceFill"
+                                    style="width:0%; height:100%; background:var(--primary); transition:width 1s;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="data-group">
+                            <div class="data-row"><span>Status:</span> <b id="liveStatus">--</b></div>
+                            <div class="data-row"><span>Disease Detected:</span> <b id="liveDisease">--</b></div>
+                            <div class="data-row"><span>Moisture Content:</span> <b id="liveMoisture">--%</b></div>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            <h4 style="margin:0 0 10px 0; font-size:14px; opacity:0.7;">Moisture History (24h)</h4>
+                            <div style="height:150px; position:relative;">
+                                <canvas id="moistureChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            <button class="btn-primary" style="width:100%" onclick="triggerWatering()">
+                                <i class="fa-solid fa-droplet"></i> Manual Water
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LIVE ACTIVITY PAGE -->
+            <section id="livePage" class="page-section" style="display:none;">
+                <div class="live-grid">
+                    <div class="glass-panel">
+                        <h3 data-i18n="liveField">🌾 Live Field View</h3>
+                        <div id="liveFarm" class="live-farm-layout"></div>
+
+                        <!-- Robot Controls -->
+                        <div style="margin-top:20px; text-align:center;">
+                            <h4 style="margin-bottom:10px;">🚜 Robot Control</h4>
+                            <div class="d-pad">
+                                <button class="pad-btn up" onmousedown="sendMove('F')" onmouseup="sendMove('S')"
+                                    ontouchstart="sendMove('F')" ontouchend="sendMove('S')"><i
+                                        class="fa-solid fa-caret-up"></i></button>
+                                <button class="pad-btn left" onmousedown="sendMove('L')" onmouseup="sendMove('S')"
+                                    ontouchstart="sendMove('L')" ontouchend="sendMove('S')"><i
+                                        class="fa-solid fa-caret-left"></i></button>
+                                <button class="pad-btn center" onclick="triggerAction('Stop')" title="Emergency Stop"><i
+                                        class="fa-solid fa-stop"></i></button>
+                                <button class="pad-btn right" onmousedown="sendMove('R')" onmouseup="sendMove('S')"
+                                    ontouchstart="sendMove('R')" ontouchend="sendMove('S')"><i
+                                        class="fa-solid fa-caret-right"></i></button>
+                                <button class="pad-btn down" onmousedown="sendMove('B')" onmouseup="sendMove('S')"
+                                    ontouchstart="sendMove('B')" ontouchend="sendMove('S')"><i
+                                        class="fa-solid fa-caret-down"></i></button>
+                            </div>
+                            <p style="font-size:11px; opacity:0.6; margin-top:5px;">Use Arrow Keys or Buttons</p>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h3 data-i18n="liveMonitor">📷 Real-time Monitoring</h3>
+                        <div class="cam-view large">
+                            <div class="overlay-rec">REC <i class="fa-solid fa-circle text-red"></i></div>
+                            <!-- Camera Stream Image - Source updated via JS -->
+                            <img id="liveStream" src="assets/cam-placeholder.jpg"
+                                style="width:100%; height:100%; object-fit:cover; display:block;"
+                                onerror="this.src='https://picsum.photos/id/1/800/400?blur=5'; this.style.opacity=0.5;"
+                                alt="Live Stream Unavailable">
+                            <div class="cam-offline" id="camOfflineMsg"
+                                style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
+                                <i class="fa-solid fa-video-slash" style="font-size:32px; opacity:0.7;"></i>
+                                <p>Signal Lost</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel">
+                        <h3 data-i18n="liveTelemetry">📊 Live Telemetry</h3>
+                        <div class="data-group">
+                            <div class="data-row"><span>Active Node:</span> <b id="livePlant">None</b></div>
+                            <div class="data-row"><span>Action:</span> <b id="liveActionLive">Idle</b></div>
+                            <div class="log-terminal" id="liveLogTerminal">
+                                <div>> System Ready...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- COMPONENTS PAGE -->
+            <section id="componentsPage" class="page-section fade-in" style="display:none;">
+                <h2><i class="fa-solid fa-server"></i> <span data-i18n="sysComponents">System Components
+                        Status</span>
+                </h2>
+                <div class="components-grid">
+                    <!-- Sensor Nodes -->
+                    <div class="glass-panel">
+                        <h3 data-i18n="compSensors">📡 Sensor Nodes</h3>
+                        <div class="component-list" id="sensorList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Actuators & Controls -->
+                    <div class="glass-panel">
+                        <h3 data-i18n="compActuators">⚙️ Manual Controls</h3>
+                        <div class="component-list">
+                            <div class="comp-item active">
+                                <i class="fa-solid fa-faucet-drip"></i>
+                                <div>
+                                    <strong>Main Water Pump</strong>
+                                    <span id="txt-pump">Active • Flow: 12L/min</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleComponent('pump', this)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="comp-item inactive">
+                                <i class="fa-solid fa-spray-can"></i>
+                                <div>
+                                    <strong>Pesticide Sprayer</strong>
+                                    <span id="txt-sprayer">Idle • Tank: 80%</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" onchange="toggleComponent('sprayer', this)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="comp-item active">
+                                <i class="fa-solid fa-video"></i>
+                                <div>
+                                    <strong>Gimbal Camera</strong>
+                                    <span id="txt-camera">Tracking • 30fps</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="toggleComponent('camera', this)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                            <div class="comp-item inactive">
+                                <i class="fa-solid fa-lightbulb"></i>
+                                <div>
+                                    <strong>Grow Lights</strong>
+                                    <span id="txt-lights">Off • Auto-Mode</span>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" onchange="toggleComponent('lights', this)">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Network -->
+                    <div class="glass-panel">
+                        <h3 data-i18n="compNetwork">🌐 Network & Power</h3>
+                        <div class="component-list">
+                            <div class="comp-item active">
+                                <i class="fa-solid fa-wifi"></i>
+                                <div>
+                                    <strong>WiFi Gateway</strong>
+                                    <span>Signal: 98% (-42dBm)</span>
+                                </div>
+                                <span class="status-badge active">Online</span>
+                            </div>
+                            <div class="comp-item active">
+                                <i class="fa-solid fa-database"></i>
+                                <div>
+                                    <strong>Local Database</strong>
+                                    <span>SQLite • Synced</span>
+                                </div>
+                                <span class="status-badge active">Ok</span>
+                            </div>
+                            <div class="comp-item warn">
+                                <i class="fa-solid fa-battery-half"></i>
+                                <div>
+                                    <strong>Backup Battery</strong>
+                                    <span>Level: 45%</span>
+                                </div>
+                                <span class="status-badge warn">Charging</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

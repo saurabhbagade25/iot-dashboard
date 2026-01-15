@@ -1,0 +1,49 @@
+/* Robot Controls */
+.d-pad {
+    display: inline-grid;
+    grid-template-areas:
+        ". up ."
+        "left center right"
+        ". down .";
+    gap: 5px;
+}
+
+.pad-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pad-btn:active,
+.pad-btn:hover {
+    background: var(--primary);
+    transform: scale(0.95);
+}
+
+.pad-btn.up {
+    grid-area: up;
+}
+
+.pad-btn.left {
+    grid-area: left;
+}
+
+.pad-btn.right {
+    grid-area: right;
+}
+
+.pad-btn.down {
+    grid-area: down;
+}
+
+.pad-btn.center {
+    grid-area: center;
+    background: rgba(255, 50, 50, 0.2);
+}
