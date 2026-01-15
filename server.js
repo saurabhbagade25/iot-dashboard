@@ -15,7 +15,7 @@ const io = socketIo(server, {
     }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -148,5 +148,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Cloud Server is running on http://localhost:${PORT}`);
+    console.log(`Cloud Server is running on port ${PORT}`);
 });
