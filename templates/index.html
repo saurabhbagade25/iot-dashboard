@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agro 2.0 Smart Farming Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <i class="fa-solid fa-robot"></i>
+            <h1>Agro 2.0 – AI Smart Farming Robot</h1>
+        </div>
+        <div class="status-badge" id="connStatus">Connected</div>
+    </header>
+
+    <div class="container">
+
+        <!-- Live Feed Section -->
+        <div class="card video-card">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-video"></i> Live AI Vision</h2>
+                <span class="live-indicator">LIVE</span>
+            </div>
+            <div class="video-container">
+                <img src="/video" class="camera" alt="Waiting for Camera...">
+                <div class="overlay" id="overlay">
+                    AI Active: YOLOv8
+                </div>
+            </div>
+        </div>
+
+        <!-- Status & Controls -->
+        <div class="right-panel">
+            
+            <!-- Real-time Status -->
+            <div class="card status-card">
+                <h2><i class="fa-solid fa-chart-line"></i> System Status</h2>
+                
+                <div class="stat-row">
+                    <span class="label">Mode:</span>
+                    <span class="value" id="mode">Initializing...</span>
+                </div>
+                <div class="stat-row">
+                    <span class="label">Detection:</span>
+                    <span class="value highlight" id="detection">--</span>
+                </div>
+                <div class="stat-row">
+                    <span class="label">Pump/Spray:</span>
+                    <span class="value" id="pump">OFF</span>
+                </div>
+            </div>
+
+            <!-- Manual Controls -->
+            <div class="card controls-card">
+                <h2><i class="fa-solid fa-gamepad"></i> Manual Control</h2>
+                
+                <div class="dpad-grid">
+                    <div></div>
+                    <button class="btn-control" onclick="send('forward')"><i class="fa-solid fa-arrow-up"></i></button>
+                    <div></div>
+                    
+                    <button class="btn-control" onclick="send('left')"><i class="fa-solid fa-arrow-left"></i></button>
+                    <button class="btn-control stop" onclick="send('stop')"><i class="fa-solid fa-stop"></i></button>
+                    <button class="btn-control" onclick="send('right')"><i class="fa-solid fa-arrow-right"></i></button>
+                    
+                    <div></div>
+                    <button class="btn-control" onclick="send('backward')"><i class="fa-solid fa-arrow-down"></i></button>
+                    <div></div>
+                </div>
+
+                <hr class="divider">
+
+                <div class="action-buttons">
+                    <button class="btn-action spray-on" onclick="send('pump_on')">
+                        <i class="fa-solid fa-faucet-drip"></i> Spray ON
+                    </button>
+                    <button class="btn-action spray-off" onclick="send('pump_off')">
+                        <i class="fa-solid fa-ban"></i> Spray OFF
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

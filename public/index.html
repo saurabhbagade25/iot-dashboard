@@ -7,6 +7,10 @@
     <title>Intelligent Sprinkling System – Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/robot.css">
+    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="css/ai_mode.css">
+
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome for Icons -->
@@ -30,7 +34,7 @@
 
         <div class="login-card glass-panel slide-up">
             <div class="brand-large">
-                <i class="fa-solid fa-leaf text-green-400"></i> <span class="text-white">Team Agrosense</span>
+                <i class="fa-solid fa-leaf text-green-400"></i> <span class="text-white">Team AgroSense</span>
             </div>
             <h3 data-i18n="loginTitle" style="color:white; margin:10px 0; font-weight:600;">Welcome Back</h3>
             <p data-i18n="loginSubtitle" style="color:rgba(255,255,255,0.8); font-size:14px; margin-bottom:30px;">Sign
@@ -68,17 +72,24 @@
     <div class="app-container" id="mainApp" style="display:none;">
         <aside class="sidebar-nav">
             <div class="brand">
-                <i class="fa-solid fa-leaf"></i> <span>Team Agrosense</span>
+                <i class="fa-solid fa-leaf"></i> <span>Team Agro Sense</span>
             </div>
             <nav>
                 <button class="nav-btn active" onclick="showPage('home')" id="btn-home">
                     <i class="fa-solid fa-house"></i> <span data-i18n="navHome">Home</span>
                 </button>
-                <button class="nav-btn" onclick="showPage('dashboard')" id="btn-dashboard">
-                    <i class="fa-solid fa-chart-line"></i> <span data-i18n="navDashboard">Dashboard</span>
-                </button>
+
                 <button class="nav-btn" onclick="showPage('live')" id="btn-live">
                     <i class="fa-solid fa-video"></i> <span data-i18n="navLive">Live Activity</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('activity')" id="btn-activity">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="navActivity">Activity</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('analytics')" id="btn-analytics">
+                    <i class="fa-solid fa-chart-line"></i> <span>Data Analytics</span>
+                </button>
+                <button class="nav-btn" onclick="showPage('robot')" id="btn-robot">
+                    <i class="fa-solid fa-robot"></i> <span>Robot Control</span>
                 </button>
                 <button class="nav-btn" onclick="showPage('components')" id="btn-components">
                     <i class="fa-solid fa-microchip"></i> <span data-i18n="navComponents">Components</span>
@@ -95,8 +106,12 @@
                         🌐 EN/MR
                     </button>
                     <div class="system-status">
-                        <span class="status-indicator"></span> <span data-i18n="systemLabel">System:</span> <span
-                            id="systemState">Active</span>
+                        <span data-i18n="systemLabel">System:</span>
+                        <span id="state-idle" class="badge-status active">Active</span>
+                        <span id="state-scanning" class="badge-status warn" style="display:none;"><i
+                                class="fa-solid fa-spinner fa-spin"></i> Scanning...</span>
+                        <span id="state-spraying" class="badge-status danger" style="display:none;"><i
+                                class="fa-solid fa-faucet-drip"></i> Spraying...</span>
                     </div>
                 </div>
             </header>
@@ -119,233 +134,472 @@
                             </div>
                         </div>
                         <div class="weather-widget">
-                            <i class="fa-solid fa-cloud-sun sun-anim" style="font-size:48px;"></i>
+                            <i id="weatherIcon" class="fa-solid fa-cloud-sun sun-anim" style="font-size:48px;"></i>
                             <div style="text-align:right;">
-                                <div style="font-size:32px; font-weight:bold;">24°C</div>
-                                <div style="font-size:12px; opacity:0.9;" data-i18n="weatherDesc">Sunny • Humidity
-                                    45%
+                                <div id="weatherTemp" style="font-size:32px; font-weight:bold;">--°C</div>
+                                <div style="font-size:12px; opacity:0.9;">
+                                    <span id="weatherDesc" data-i18n="weatherDesc">Loading...</span> • 💧 <span
+                                        id="weatherHum">--%</span>
+                                </div>
+                                <div style="font-size:11px; opacity:0.8; margin-top:4px;">
+                                    💨 <span id="weatherWind">-- km/h</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Key Metrics -->
-                    <div class="metric-card glass-panel">
-                        <div class="metric-icon" style="background:#e3f2fd; color:#1976d2;"><i
-                                class="fa-solid fa-droplet"></i></div>
-                        <div>
-                            <div class="metric-label" data-i18n="avgMoisture">Avg Soil Moisture</div>
-                            <div class="metric-value">62%</div>
-                            <div class="metric-trend good"><i class="fa-solid fa-arrow-up"></i> <span
-                                    data-i18n="trendMoisture">2% vs yesterday</span></div>
+                    <div class="metric-card glass-panel" style="position: relative; overflow: hidden;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; position: relative; z-index: 2;">
+                            <div style="display: flex; gap: 15px;">
+                                <div class="metric-icon" style="background:#e3f2fd; color:#1976d2;"><i
+                                        class="fa-solid fa-droplet"></i></div>
+                                <div>
+                                    <div class="metric-label" data-i18n="avgMoisture">Avg Soil Moisture</div>
+                                    <div class="metric-value">62%</div>
+                                    <div class="metric-trend good"><i class="fa-solid fa-arrow-up"></i> <span
+                                            data-i18n="trendMoisture">2% vs yesterday</span></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="metric-card glass-panel">
-                        <div class="metric-icon" style="background:#e8f5e9; color:#2e7d32;"><i
-                                class="fa-solid fa-seedling"></i></div>
-                        <div>
-                            <div class="metric-label" data-i18n="plantHealth">Plant Health</div>
-                            <div class="metric-value">98%</div>
-                            <div class="metric-trend good" data-i18n="statusStable">Stable condition</div>
-                        </div>
-                    </div>
-                    <div class="metric-card glass-panel">
-                        <div class="metric-icon" style="background:#fff3e0; color:#f57c00;"><i
-                                class="fa-solid fa-triangle-exclamation"></i></div>
-                        <div>
-                            <div class="metric-label" data-i18n="activeAlerts">Active Alerts</div>
-                            <div class="metric-value">0</div>
-                            <div class="metric-trend" data-i18n="statusNominal">All systems nominal</div>
+                        <div
+                            style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 1; opacity: 0.5;">
+                            <canvas id="moistureSparkline"></canvas>
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
+                    <div class="metric-card glass-panel" style="position: relative; overflow: hidden;">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; position: relative; z-index: 2;">
+                            <div style="display: flex; gap: 15px;">
+                                <div class="metric-icon" style="background:#e8f5e9; color:#2e7d32;"><i
+                                        class="fa-solid fa-seedling"></i></div>
+                                <div>
+                                    <div class="metric-label" data-i18n="plantHealth">Plant Health</div>
+                                    <div class="metric-value">98%</div>
+                                    <div class="metric-trend good" data-i18n="statusStable">Stable condition</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            style="position: absolute; bottom: 0; left: 0; width: 100%; height: 60px; z-index: 1; opacity: 0.5;">
+                            <canvas id="healthSparkline"></canvas>
+                        </div>
+                    </div>
+
+
+
+
+
+                    <!-- Plant Detection Card -->
+                    <div class="metric-card glass-panel"
+                        style="flex-direction: column; align-items: stretch; gap: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="metric-icon" style="background:#fff3e0; color:#ef6c00;">
+                                    <i class="fa-solid fa-brain"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-label">AI Model</div>
+                                    <div class="metric-value" style="font-size: 20px;">Plant & Disease Monitor</div>
+                                </div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="planDetectionToggle" onchange="toggleAIModel('plan', this)">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <!-- AI Stats Grid -->
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px;">
+                            <div title="Model Accuracy"><i class="fa-solid fa-bullseye" style="color: #4CAF50;"></i>
+                                Accuracy: <strong>94%</strong></div>
+                            <div title="Last Detection Time"><i class="fa-regular fa-clock" style="color: #666;"></i>
+                                Last: <strong>2m ago</strong></div>
+                            <div title="Detections Today"><i class="fa-solid fa-camera" style="color: #2196F3;"></i>
+                                Today: <strong>128</strong></div>
+                            <div title="Average Confidence"><i class="fa-solid fa-wand-magic-sparkles"
+                                    style="color: #9C27B0;"></i> Conf: <strong>High</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- Weed Detection Card -->
+                    <div class="metric-card glass-panel"
+                        style="flex-direction: column; align-items: stretch; gap: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div class="metric-icon" style="background:#fbe9e7; color:#d84315;">
+                                    <i class="fa-solid fa-spider"></i>
+                                </div>
+                                <div>
+                                    <div class="metric-label">AI Model</div>
+                                    <div class="metric-value" style="font-size: 20px;">Weed Detection</div>
+                                </div>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="weedDetectionToggle" onchange="toggleAIModel('weed', this)">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <!-- AI Stats Grid -->
+                        <div
+                            style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; background: rgba(0,0,0,0.03); padding: 10px; border-radius: 8px;">
+                            <div title="Model Accuracy"><i class="fa-solid fa-bullseye" style="color: #4CAF50;"></i>
+                                Accuracy: <strong>89%</strong></div>
+                            <div title="Last Detection Time"><i class="fa-regular fa-clock" style="color: #666;"></i>
+                                Last: <strong>45s ago</strong></div>
+                            <div title="Detections Today"><i class="fa-solid fa-camera" style="color: #2196F3;"></i>
+                                Today: <strong>32</strong></div>
+                            <div title="Average Confidence"><i class="fa-solid fa-wand-magic-sparkles"
+                                    style="color: #9C27B0;"></i> Conf: <strong>Med</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- System Activity (Home) -->
                     <div class="glass-panel" style="grid-column: span 2;">
-                        <h3 data-i18n="quickActions">⚡ Quick Actions</h3>
-                        <div class="action-grid">
-                            <button class="action-btn" onclick="triggerAction('All Sprinklers ON')">
-                                <i class="fa-solid fa-faucet-drip"></i>
-                                <span data-i18n="actInject">Inject Water</span>
-                            </button>
-                            <button class="action-btn" onclick="triggerAction('System Calibration')">
-                                <i class="fa-solid fa-compass"></i>
-                                <span data-i18n="actCalibrate">Calibrate Sensors</span>
-                            </button>
-                            <button class="action-btn" onclick="triggerAction('Drone Patrol')">
-                                <i class="fa-solid fa-helicopter"></i>
-                                <span data-i18n="actPatrol">Start Patrol</span>
-                            </button>
-                            <button class="action-btn warning" onclick="triggerAction('Emergency Stop')">
-                                <i class="fa-solid fa-power-off"></i>
-                                <span data-i18n="actStop">Emergency Stop</span>
-                            </button>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin-bottom: 15px;" data-i18n="systemActivity">📋 System Activity</h3>
+                            <a href="#" onclick="showPage('activity')"
+                                style="font-size:12px; color:var(--primary);">View All</a>
                         </div>
-                    </div>
-
-                    <!-- Recent Logs -->
-                    <div class="glass-panel" style="grid-column: span 1; grid-row: span 2;">
-                        <h3 data-i18n="systemActivity">📋 System Activity</h3>
-                        <ul id="logList" class="timeline-logs">
+                        <ul id="logListHome" class="timeline-logs" style="max-height: 150px; overflow-y: auto;">
                             <li data-i18n="loadingLogs">Loading logs...</li>
                         </ul>
                     </div>
+
+
+
                 </div>
             </section>
 
-            <!-- DASHBOARD PAGE -->
-            <section id="dashboardPage" class="page-section" style="display:none;">
-                <div class="glass-panel control-panel">
-                    <div class="control-group">
-                        <label>Beds</label>
-                        <input type="number" id="beds" value="2" min="1" max="10">
-                    </div>
-                    <div class="control-group">
-                        <label>Plants/Bed</label>
-                        <input type="number" id="plants" value="6" min="1" max="20">
-                    </div>
-                    <div class="control-group">
-                        <label>Plant Size</label>
-                        <input type="range" id="plantSize" min="16" max="60" value="28"
-                            oninput="updatePlantSize(this.value)">
-                        <span id="sizeValue">28px</span>
-                    </div>
-                    <div class="control-group" style="flex-grow:2; min-width:200px;">
-                        <label>Camera URL</label>
-                        <input type="text" id="cameraUrl" placeholder="http://192.168.0.x:8080/?action=stream"
-                            style="width:100%;">
-                    </div>
-                    <button class="btn-primary" onclick="generateFarmAndSave()">
-                        <i class="fa-solid fa-rotate"></i> Update Layout
-                    </button>
-                </div>
 
-                <div class="dashboard-grid">
-                    <div class="farm-area glass-panel" id="farm">
-                        <!-- Farm layout generated here -->
+
+            <!-- LIVE ACTIVITY PAGE -->
+            <!-- LIVE ACTIVITY PAGE -->
+            <!-- LIVE ACTIVITY PAGE -->
+            <!-- LIVE ACTIVITY PAGE -->
+            <section id="livePage" class="page-section"
+                style="display:none; width: 100%; height: 75vh; color: white; background-color: #0f172a; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+
+                <div style="display: flex; flex-direction: column; height: 100%;">
+
+                    <!-- Header -->
+                    <div
+                        style="background-color: #020617; padding: 18px 24px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; gap: 10px; flex-shrink: 0;">
+                        🌱 AgroSense – Live Plant Detection
                     </div>
 
-                    <!-- New Slide-Over Sidebar -->
-                    <div class="details-sidebar" id="detailsSidebar">
-                        <div class="sidebar-header">
-                            <h3 id="plantName" style="margin:0;"><i class="fa-solid fa-seedling"></i> Plant Details
-                            </h3>
-                            <div style="display:flex; gap:10px;">
-                                <button class="close-btn" onclick="toggleEditMode()" title="Edit Data"><i
-                                        class="fa-solid fa-pen"></i></button>
-                                <button class="close-btn" onclick="closeSidebar()"><i
-                                        class="fa-solid fa-times"></i></button>
-                            </div>
-                        </div>
+                    <!-- Main Video Area -->
+                    <div
+                        style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; background: #131c31; position: relative;">
 
-                        <div class="comparison-view">
-                            <div class="comp-img-box">
-                                <img id="refImg" class="comp-img ref" src="" alt="Reference">
-                                <span>Reference (Healthy)</span>
-                            </div>
-                            <div class="comp-img-box" style="position:relative;">
-                                <img id="liveScanImg" class="comp-img live" src="" alt="Scan">
-                                <div class="scan-overlay"></div>
-                                <span>Live Scan <span
-                                        style="font-size:9px; color:var(--primary);">(Analysing...)</span></span>
-                            </div>
-                        </div>
+                        <div class="video-container-custom"
+                            style="position: relative; width: 90%; height: 90%; max-width: 900px; border-radius: 12px; overflow: hidden; background: #000; box-shadow: 0 10px 40px rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;">
 
-                        <div class="ai-analysis"
-                            style="background:#f4f6f8; padding:10px; border-radius:8px; margin-bottom:15px;">
+                            <!-- REC Indic -->
                             <div
-                                style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px;">
-                                <span>AI Confidence Score</span>
-                                <b id="aiConfidence">--%</b>
+                                style="position: absolute; top: 15px; left: 15px; background: rgba(0, 0, 0, 0.6); padding: 6px 14px; border-radius: 20px; font-weight: 600; color: white; display: flex; align-items: center; gap: 8px; z-index: 20; font-size: 13px; border: 1px solid rgba(255,255,255,0.1);">
+                                <div
+                                    style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%; box-shadow: 0 0 10px #ef4444; animation: pulse 1.5s infinite;">
+                                </div>
+                                LIVE REC
                             </div>
-                            <div class="progress-bar-bg"
-                                style="width:100%; height:6px; background:#ddd; border-radius:3px; overflow:hidden;">
-                                <div class="progress-bar-fill" id="aiConfidenceFill"
-                                    style="width:0%; height:100%; background:var(--primary); transition:width 1s;">
+
+                            <!-- Video Stream -->
+                            <img id="liveStream" src="http://RASPBERRY_PI_IP:5000/video_feed"
+                                alt="Live Detection Stream"
+                                style="width: 100%; height: 100%; object-fit: contain; display: block;"
+                                onerror="this.style.opacity=0.3; document.getElementById('camOfflineMsg').style.display='flex';">
+
+                            <!-- Offline Overlay -->
+                            <div id="camOfflineMsg"
+                                style="display:none; flex-direction: column; align-items: center; justify-content: center; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10;">
+                                <div
+                                    style="background: rgba(15, 23, 42, 0.9); padding: 30px 50px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); text-align: center; backdrop-filter: blur(5px);">
+                                    <i class="fa-solid fa-video-slash"
+                                        style="font-size: 40px; color: #ef4444; margin-bottom: 15px; display: inline-block;"></i>
+                                    <h3 style="color: white; margin: 0 0 8px 0; font-size: 18px;">Signal Lost</h3>
+                                    <p style="color: #94a3b8; margin: 0; font-size: 13px;">Waiting for connection...</p>
+                                    <button class="btn-primary" onclick="retryVideoStream()"
+                                        style="margin-top: 15px; padding: 8px 16px; font-size: 12px; background: rgba(255,255,255,0.1);"><i
+                                            class="fa-solid fa-rotate"></i> Retry</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div
+                        style="background-color: #020617; padding: 12px; font-size: 12px; color: #64748b; border-top: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
+                        Powered by Raspberry Pi 5 • YOLO • OpenCV • Flask
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ROBOT CONTROL PAGE -->
+            <section id="robotPage" class="page-section" style="display:none;">
+                <div class="glass-panel" style="padding: 30px;">
+                    <header
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:15px;">
+                        <div>
+                            <h2 style="margin:0; font-size:24px;">🚜 AgroBot Command Center</h2>
+                            <p style="margin:5px 0 0; opacity:0.6; font-size:14px;">Advanced Teleoperation Interface</p>
+                        </div>
+                        <div id="connectionStatusBadge"
+                            style="background:rgba(76,175,80,0.2); color:#4CAF50; padding:5px 15px; border-radius:20px; font-size:14px; display:flex; align-items:center; gap:8px;">
+                            <span
+                                style="display:inline-block; width:8px; height:8px; background:#4CAF50; border-radius:50%; box-shadow:0 0 10px #4CAF50;"></span>
+                            System Online
+                        </div>
+                    </header>
+
+                    <!-- Main Dashboard Grid -->
+                    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:25px;">
+
+                        <!-- COLUMN 1: NAVIGATION -->
+                        <div class="control-column">
+                            <div class="panel-section" style="margin-bottom:20px;">
+                                <h3 class="section-title"
+                                    style="margin-bottom:15px; font-size:16px; color:var(--primary);"><i
+                                        class="fa-solid fa-gamepad"></i> Navigation Control</h3>
+
+                                <!-- Mode Toggle -->
+                                <div class="mode-switch-container"
+                                    style="background:rgba(0,0,0,0.3); padding:5px; border-radius:30px; display:flex; position:relative; margin-bottom:25px;">
+                                    <button id="btnManualModeRobot" onclick="setRobotMode('MANUAL')"
+                                        style="flex:1; background:var(--primary); color:black; border:none; padding:10px; border-radius:25px; font-weight:bold; cursor:pointer; transition:all 0.3s;">MANUAL</button>
+                                    <button id="btnAutoModeRobot" onclick="setRobotMode('AUTO')"
+                                        style="flex:1; background:transparent; color:white; border:none; padding:10px; border-radius:25px; font-weight:bold; cursor:pointer; transition:all 0.3s;">AUTO
+                                        AI</button>
+                                </div>
+                                <div id="autoModeStatusRobot"
+                                    style="display:none; margin-bottom:15px; text-align:center; color:var(--primary); animation:pulse 2s infinite; background:rgba(76,175,80,0.1); padding:10px; border-radius:8px; font-size:12px;">
+                                    🤖 AI is controlling the robot...
+                                </div>
+
+                                <!-- D-Pad -->
+                                <div id="manualControlsSectionRobot" style="transition: opacity 0.3s;">
+                                    <div class="d-pad-advanced"
+                                        style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; max-width:200px; margin:0 auto 20px;">
+                                        <div></div>
+                                        <button id="btnUp" class="nav-btn-adv" onmousedown="sendRobotCommand('FORWARD')"
+                                            onmouseup="sendRobotCommand('STOP')"
+                                            style="aspect-ratio:1; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer;"><i
+                                                class="fa-solid fa-chevron-up"></i></button>
+                                        <div></div>
+
+                                        <button id="btnLeft" class="nav-btn-adv" onmousedown="sendRobotCommand('LEFT')"
+                                            onmouseup="sendRobotCommand('STOP')"
+                                            style="aspect-ratio:1; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer;"><i
+                                                class="fa-solid fa-chevron-left"></i></button>
+                                        <button id="btnStop" class="nav-btn-adv" onclick="sendRobotCommand('STOP')"
+                                            style="aspect-ratio:1; border-radius:50%; background:#f44336; border:none; color:white; font-size:20px; cursor:pointer; box-shadow:0 0 15px rgba(244,67,54,0.4);"><i
+                                                class="fa-solid fa-stop"></i></button>
+                                        <button id="btnRight" class="nav-btn-adv"
+                                            onmousedown="sendRobotCommand('RIGHT')" onmouseup="sendRobotCommand('STOP')"
+                                            style="aspect-ratio:1; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer;"><i
+                                                class="fa-solid fa-chevron-right"></i></button>
+
+                                        <div></div>
+                                        <button id="btnDown" class="nav-btn-adv" onmousedown="sendRobotCommand('BACK')"
+                                            onmouseup="sendRobotCommand('STOP')"
+                                            style="aspect-ratio:1; border-radius:12px; background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:white; font-size:24px; cursor:pointer;"><i
+                                                class="fa-solid fa-chevron-down"></i></button>
+                                        <div></div>
+                                    </div>
+
+                                    <!-- Speed Slider -->
+                                    <div style="background:rgba(0,0,0,0.2); padding:15px; border-radius:10px;">
+                                        <div
+                                            style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:12px;">
+                                            <span><i class="fa-solid fa-gauge-high"></i> Speed Limit</span>
+                                            <span id="speedValueDisplay">50%</span>
+                                        </div>
+                                        <input type="range" min="0" max="100" value="50"
+                                            oninput="document.getElementById('speedValueDisplay').innerText=this.value+'%'"
+                                            style="width:100%; accent-color:var(--primary); height:6px; border-radius:3px; outline:none;">
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="data-group">
-                            <div class="data-row"><span>Status:</span> <b id="liveStatus">--</b></div>
-                            <div class="data-row"><span>Disease Detected:</span> <b id="liveDisease">--</b></div>
-                            <div class="data-row"><span>Moisture Content:</span> <b id="liveMoisture">--%</b></div>
-                        </div>
+                        <!-- COLUMN 2: ARM MANIPULATION -->
+                        <div class="control-column">
+                            <div class="panel-section" style="margin-bottom:20px; height:100%;">
+                                <h3 class="section-title" style="margin-bottom:15px; font-size:16px; color:#FF9800;"><i
+                                        class="fa-solid fa-robot"></i> Robotic Arm</h3>
 
-                        <div style="margin-top:20px;">
-                            <h4 style="margin:0 0 10px 0; font-size:14px; opacity:0.7;">Moisture History (24h)</h4>
-                            <div style="height:150px; position:relative;">
-                                <canvas id="moistureChart"></canvas>
+                                <div
+                                    style="background:rgba(0,0,0,0.3); border-radius:15px; padding:20px; position:relative; min-height:300px;">
+                                    <!-- Visual Representation -->
+                                    <div class="arm-visual-container">
+                                        <div class="arm-scenery-floor"></div>
+                                        <div class="arm-base-visual"></div>
+
+                                        <!-- Nested Arm Structure (Side View) -->
+                                        <!-- Shoulder Pivot -->
+                                        <div class="arm-seg-shoulder" id="vis-shoulder-pivot"
+                                            style="transform: rotate(-10deg);">
+                                            <div class="bone shoulder-bone">
+                                                <!-- Elbow Pivot -->
+                                                <div class="elbow-pivot" id="vis-elbow-pivot"
+                                                    style="transform: rotate(45deg);">
+                                                    <div class="bone elbow-bone">
+                                                        <!-- Wrist Pivot (Simulated) -->
+                                                        <div class="wrist-pivot" id="vis-wrist-pivot"
+                                                            style="transform: rotate(-20deg);">
+                                                            <div class="bone wrist-bone">
+                                                                <div class="gripper"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Sliders -->
+                                    <div class="arm-controls" style="display:flex; flex-direction:column; gap:25px;">
+                                        <!-- Base (X) -->
+                                        <div class="slider-group">
+                                            <div
+                                                style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                                <span
+                                                    style="font-size:12px; color:#ddd; display:flex; align-items:center; gap:5px;"><i
+                                                        class="fa-solid fa-arrows-left-right-to-line"></i> Base
+                                                    Rotation</span>
+                                                <span id="labelBase" class="glow-text"
+                                                    style="color:#03A9F4; font-family:monospace; font-weight:bold;">90°</span>
+                                            </div>
+                                            <input type="range" id="sliderBase" min="30" max="150" value="90"
+                                                oninput="updateArmPreview()"
+                                                style="background: linear-gradient(to right, #03A9F4 50%, rgba(255,255,255,0.1) 50%); accent-color:#03A9F4;">
+                                        </div>
+
+                                        <!-- Shoulder (Y) -->
+                                        <div class="slider-group">
+                                            <div
+                                                style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                                <span
+                                                    style="font-size:12px; color:#ddd; display:flex; align-items:center; gap:5px;"><i
+                                                        class="fa-solid fa-angle-up"></i> Shoulder Lift</span>
+                                                <span id="labelShoulder" class="glow-text"
+                                                    style="color:#FF9800; font-family:monospace; font-weight:bold;">90°</span>
+                                            </div>
+                                            <input type="range" id="sliderShoulder" min="40" max="150" value="90"
+                                                oninput="updateArmPreview()"
+                                                style="background: linear-gradient(to right, #FF9800 50%, rgba(255,255,255,0.1) 50%); accent-color:#FF9800;">
+                                        </div>
+
+                                        <!-- Elbow (Z) -->
+                                        <div class="slider-group">
+                                            <div
+                                                style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                                                <span
+                                                    style="font-size:12px; color:#ddd; display:flex; align-items:center; gap:5px;"><i
+                                                        class="fa-solid fa-code-branch"></i> Elbow Reach</span>
+                                                <span id="labelElbow" class="glow-text"
+                                                    style="color:#E91E63; font-family:monospace; font-weight:bold;">90°</span>
+                                            </div>
+                                            <input type="range" id="sliderElbow" min="50" max="160" value="90"
+                                                oninput="updateArmPreview()"
+                                                style="background: linear-gradient(to right, #E91E63 50%, rgba(255,255,255,0.1) 50%); accent-color:#E91E63;">
+                                        </div>
+                                    </div>
+
+                                    <button onclick="resetArm()"
+                                        style="margin-top:25px; width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white; border-radius:8px; cursor:pointer; font-size:12px; transition:all 0.2s;">
+                                        <i class="fa-solid fa-rotate-left"></i> Reset Position
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div style="margin-top:20px;">
-                            <button class="btn-primary" style="width:100%" onclick="triggerWatering()">
-                                <i class="fa-solid fa-droplet"></i> Manual Water
-                            </button>
+                        <!-- COLUMN 3: SYSTEM STATUS & SPRAY -->
+                        <!-- COLUMN 3: SYSTEM STATUS & SPRAY -->
+                        <div class="control-column">
+                            <div class="panel-section">
+                                <h3 class="section-title"
+                                    style="margin-bottom:15px; font-size:16px; color:#4CAF50; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa-solid fa-chart-pie"></i> System Health
+                                </h3>
+
+                                <!-- Status Grid -->
+                                <div class="status-grid">
+                                    <div class="status-item">
+                                        <div class="radial-progress">
+                                            <svg class="circular-chart" viewBox="0 0 36 36">
+                                                <path class="circle-bg"
+                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                                <path class="circle" stroke-dasharray="85, 100"
+                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                            </svg>
+                                            <div class="radial-text">
+                                                <span style="font-size:14px;">85</span>
+                                                <span style="font-size:8px; opacity:0.7;">%</span>
+                                            </div>
+                                        </div>
+                                        <span>Battery</span>
+                                    </div>
+
+                                    <div class="status-item">
+                                        <div class="signal-bars-container">
+                                            <div class="bar full"></div>
+                                            <div class="bar full"></div>
+                                            <div class="bar full"></div>
+                                            <div class="bar full"></div>
+                                            <div class="bar"></div>
+                                        </div>
+                                        <span>Signal</span>
+                                    </div>
+                                </div>
+
+                                <!-- Spray Control Card -->
+                                <div class="spray-control-card" style="margin-bottom:20px;">
+                                    <div class="spray-header">
+                                        <span><i class="fa-solid fa-faucet-drip"></i> SPRAY MAIN</span>
+                                        <span class="badge-status">STANDBY</span>
+                                    </div>
+                                    <div class="spray-actions">
+                                        <button class="btn-cyber green" onclick="sendRobotCommand('SPRAY_ON')">
+                                            <i class="fa-solid fa-power-off"></i> Engage
+                                        </button>
+                                        <button class="btn-cyber red" onclick="sendRobotCommand('SPRAY_OFF')">
+                                            <i class="fa-solid fa-ban"></i> Abort
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Terminal -->
+                                <div class="terminal-wrapper">
+                                    <div class="terminal-header">
+                                        <div class="dot red"></div>
+                                        <div class="dot yellow"></div>
+                                        <div class="dot green"></div>
+                                        <span class="term-title">ssh root@agrobot</span>
+                                    </div>
+                                    <div class="terminal-body" id="robotLogTerminal">
+                                        <div class="terminal-line"><span class="terminal-time">[10:00:01]</span>
+                                            Connection
+                                            established...</div>
+                                        <div class="terminal-line"><span class="terminal-time">[10:00:02]</span> Systems
+                                            initialized.</div>
+                                        <div class="terminal-line"><span class="terminal-time">[10:00:03]</span> Ready
+                                            for
+                                            command input.</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- LIVE ACTIVITY PAGE -->
-            <section id="livePage" class="page-section" style="display:none;">
-                <div class="live-grid">
-                    <div class="glass-panel">
-                        <h3 data-i18n="liveField">🌾 Live Field View</h3>
-                        <div id="liveFarm" class="live-farm-layout"></div>
-
-                        <!-- Robot Controls -->
-                        <div style="margin-top:20px; text-align:center;">
-                            <h4 style="margin-bottom:10px;">🚜 Robot Control</h4>
-                            <div class="d-pad">
-                                <button class="pad-btn up" onmousedown="sendMove('F')" onmouseup="sendMove('S')"
-                                    ontouchstart="sendMove('F')" ontouchend="sendMove('S')"><i
-                                        class="fa-solid fa-caret-up"></i></button>
-                                <button class="pad-btn left" onmousedown="sendMove('L')" onmouseup="sendMove('S')"
-                                    ontouchstart="sendMove('L')" ontouchend="sendMove('S')"><i
-                                        class="fa-solid fa-caret-left"></i></button>
-                                <button class="pad-btn center" onclick="triggerAction('Stop')" title="Emergency Stop"><i
-                                        class="fa-solid fa-stop"></i></button>
-                                <button class="pad-btn right" onmousedown="sendMove('R')" onmouseup="sendMove('S')"
-                                    ontouchstart="sendMove('R')" ontouchend="sendMove('S')"><i
-                                        class="fa-solid fa-caret-right"></i></button>
-                                <button class="pad-btn down" onmousedown="sendMove('B')" onmouseup="sendMove('S')"
-                                    ontouchstart="sendMove('B')" ontouchend="sendMove('S')"><i
-                                        class="fa-solid fa-caret-down"></i></button>
-                            </div>
-                            <p style="font-size:11px; opacity:0.6; margin-top:5px;">Use Arrow Keys or Buttons</p>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel">
-                        <h3 data-i18n="liveMonitor">📷 Real-time Monitoring</h3>
-                        <div class="cam-view large">
-                            <div class="overlay-rec">REC <i class="fa-solid fa-circle text-red"></i></div>
-                            <!-- Camera Stream Image - Source updated via JS -->
-                            <img id="liveStream" src="assets/cam-placeholder.jpg"
-                                style="width:100%; height:100%; object-fit:cover; display:block;"
-                                onerror="this.src='https://picsum.photos/id/1/800/400?blur=5'; this.style.opacity=0.5;"
-                                alt="Live Stream Unavailable">
-                            <div class="cam-offline" id="camOfflineMsg"
-                                style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center;">
-                                <i class="fa-solid fa-video-slash" style="font-size:32px; opacity:0.7;"></i>
-                                <p>Signal Lost</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass-panel">
-                        <h3 data-i18n="liveTelemetry">📊 Live Telemetry</h3>
-                        <div class="data-group">
-                            <div class="data-row"><span>Active Node:</span> <b id="livePlant">None</b></div>
-                            <div class="data-row"><span>Action:</span> <b id="liveActionLive">Idle</b></div>
-                            <div class="log-terminal" id="liveLogTerminal">
-                                <div>> System Ready...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <!-- COMPONENTS PAGE -->
             <section id="componentsPage" class="page-section fade-in" style="display:none;">
@@ -358,6 +612,70 @@
                         <h3 data-i18n="compSensors">📡 Sensor Nodes</h3>
                         <div class="component-list" id="sensorList">
                             <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- ROBOTIC ARM CONTROLS (NEW) -->
+                    <!-- ROBOTIC ARM CONTROLS (NEW UI) -->
+                    <div class="glass-panel" style="grid-row: span 2;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h3 data-i18n="compArm">🤖 Robotic Arm</h3>
+                            <button onclick="resetArm()"
+                                style="border:none; background:transparent; color:#E91E63; cursor:pointer; font-size:12px;"><i
+                                    class="fa-solid fa-rotate-left"></i> Reset</button>
+                        </div>
+
+                        <div class="component-list">
+                            <!-- Base Slider -->
+                            <div class="comp-item active"
+                                style="align-items: flex-start; flex-direction: column; gap:10px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                    <div><i class="fa-solid fa-rotate" style="color:#2196F3; margin-right:8px;"></i>
+                                        <strong data-i18n="armBase">Base</strong>
+                                    </div>
+                                    <span
+                                        style="font-family:monospace; background:#e3f2fd; color:#1976d2; padding:2px 6px; border-radius:4px;"><span
+                                            id="angle-base">90</span>°</span>
+                                </div>
+                                <input type="range" class="styled-slider" min="0" max="180" value="90"
+                                    oninput="updateArm('base', this.value)"
+                                    style="width:100%; height:6px; background:#ddd; border-radius:3px; outline:none; cursor:pointer;">
+                            </div>
+
+                            <!-- Shoulder Slider -->
+                            <div class="comp-item active"
+                                style="align-items: flex-start; flex-direction: column; gap:10px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                    <div><i class="fa-solid fa-arrow-up" style="color:#4CAF50; margin-right:8px;"></i>
+                                        <strong data-i18n="armShoulder">Shoulder</strong>
+                                    </div>
+                                    <span
+                                        style="font-family:monospace; background:#e8f5e9; color:#2e7d32; padding:2px 6px; border-radius:4px;"><span
+                                            id="angle-shoulder">90</span>°</span>
+                                </div>
+                                <input type="range" class="styled-slider" min="0" max="180" value="90"
+                                    oninput="updateArm('shoulder', this.value)"
+                                    style="width:100%; height:6px; background:#ddd; border-radius:3px; outline:none; cursor:pointer;">
+                            </div>
+
+                            <!-- Elbow Slider -->
+                            <div class="comp-item active"
+                                style="align-items: flex-start; flex-direction: column; gap:10px;">
+                                <div
+                                    style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                    <div><i class="fa-solid fa-compress-arrows-alt"
+                                            style="color:#FF9800; margin-right:8px;"></i> <strong
+                                            data-i18n="armElbow">Elbow</strong></div>
+                                    <span
+                                        style="font-family:monospace; background:#fff3e0; color:#ef6c00; padding:2px 6px; border-radius:4px;"><span
+                                            id="angle-elbow">90</span>°</span>
+                                </div>
+                                <input type="range" class="styled-slider" min="0" max="180" value="90"
+                                    oninput="updateArm('elbow', this.value)"
+                                    style="width:100%; height:6px; background:#ddd; border-radius:3px; outline:none; cursor:pointer;">
+                            </div>
                         </div>
                     </div>
 
@@ -377,13 +695,13 @@
                                 </label>
                             </div>
                             <div class="comp-item inactive">
-                                <i class="fa-solid fa-spray-can"></i>
+                                <i class="fa-solid fa-skull-crossbones"></i>
                                 <div>
-                                    <strong>Pesticide Sprayer</strong>
-                                    <span id="txt-sprayer">Idle • Tank: 80%</span>
+                                    <strong data-i18n="compWeedSprayer">Weed Sprayer</strong>
+                                    <span id="txt-weed_sprayer">Idle • Tank: 80%</span>
                                 </div>
                                 <label class="switch">
-                                    <input type="checkbox" onchange="toggleComponent('sprayer', this)">
+                                    <input type="checkbox" onchange="toggleComponent('weed_sprayer', this)">
                                     <span class="slider round"></span>
                                 </label>
                             </div>
@@ -442,12 +760,96 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Activity Log (Components View) -->
+                    <div class="glass-panel" style="grid-column: span 1;">
+                        <h3 data-i18n="systemActivity">📋 System Activity</h3>
+                        <ul id="logListComp" class="timeline-logs" style="max-height: 200px; overflow-y: auto;">
+                            <li data-i18n="loadingLogs">Loading logs...</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ACTIVITY PAGE -->
+            <section id="activityPage" class="page-section fade-in" style="display:none;">
+                <h2><i class="fa-solid fa-clock-rotate-left"></i> <span data-i18n="navActivity">System Activity
+                        History</span></h2>
+                <div class="glass-panel" style="margin-top:20px;">
+                    <h3 data-i18n="systemActivity">📋 System Activity</h3>
+                    <ul id="logList" class="timeline-logs" style="max-height: 600px; overflow-y: auto;">
+                        <li data-i18n="loadingLogs">Loading logs...</li>
+                    </ul>
+                </div>
+
+            </section>
+
+            <!-- ANALYTICS PAGE -->
+            <section id="analyticsPage" class="page-section fade-in" style="display:none;">
+                <h2><i class="fa-solid fa-chart-line"></i> Data Analytics & Reporting</h2>
+
+                <div class="glass-panel" style="margin-top:20px; min-height:600px;">
+                    <h3><i class="fa-solid fa-file-csv"></i> Historical Data Visualizer</h3>
+                    <p style="opacity:0.7; font-size:14px; margin-bottom:25px; line-height:1.5;">
+                        Upload CSV log files exported from your Raspberry Pi to analyze long-term trends in soil
+                        moisture, temperature, and system events.
+                        <br>Simply drag and drop or select your file below.
+                    </p>
+
+                    <div
+                        style="background:rgba(255,255,255,0.05); border:2px dashed rgba(255,255,255,0.2); border-radius:10px; padding:30px; text-align:center; margin-bottom:30px;">
+                        <input type="file" id="csvUpload" accept=".csv" onchange="handleCSVUpload(this)"
+                            style="display:none;">
+                        <label for="csvUpload" class="btn-primary"
+                            style="cursor:pointer; padding:10px 20px; display:inline-block; margin-bottom:10px;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Select CSV File
+                        </label>
+                        <div style="font-size:12px; opacity:0.6;">Supported formats: .csv (Timestamp, Value1, Value2...)
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; margin-bottom:15px;">
+                        <button onclick="document.getElementById('csvUpload').value = ''; initCSVChart()"
+                            class="btn-light" style="font-size:12px;"><i class="fa-solid fa-rotate-right"></i> Reset
+                            Chart</button>
+                    </div>
+
+                    <div
+                        style="height:400px; width:100%; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px;">
+                        <canvas id="csvChart"></canvas>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <!-- Chatbot Widget -->
+    <div class="chat-widget-btn" onclick="toggleChat()">
+        <i class="fa-solid fa-robot"></i>
+    </div>
+
+    <div class="chat-window hidden" id="chatWindow">
+        <div class="chat-header">
+            <i class="fa-solid fa-seedling"></i> AgroBot AI
+            <span style="flex:1"></span>
+            <i class="fa-solid fa-times" style="cursor:pointer; opacity:0.8;" onclick="toggleChat()"></i>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-msg bot">
+                👋 Hi! I'm AgroBot. Ask me about system status, weed detection, or plant health!
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type a message..."
+                onkeypress="handleChatKey(event)">
+            <button class="chat-send-btn" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <script>
+        const ROBOT_API = "http://RASPBERRY_PI_IP:5000";
+    </script>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 

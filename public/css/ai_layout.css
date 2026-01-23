@@ -1,0 +1,82 @@
+/* Layout for sidebar + cards */
+.ai-selection-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 200px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Main Content Area */
+.ai-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 20px;
+    gap: 20px;
+}
+
+/* Individual Card */
+.ai-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px solid #ccc;
+    border-radius: 12px;
+    min-width: 220px;
+    min-height: 160px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.ai-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.ai-card h3 {
+    margin: 0;
+    font-size: 18px;
+    text-align: center;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Sidebar */
+.ai-sidebar {
+    width: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.4);
+    border-left: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.ai-sidebar span {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .ai-content {
+        flex-direction: column;
+    }
+
+    .ai-card {
+        width: 100%;
+    }
+}

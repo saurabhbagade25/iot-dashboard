@@ -1,3 +1,49 @@
 node_modules/
 .env
 .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Env
+venv/
+env/
+.venv/
+
+# Environment Variables
+.env
+.flaskenv
+
+# Database
+*.db
+*.sqlite3
+database/farm.db
+database/farm.db-shm
+database/farm.db-wal
+
+# Logs
+*.log
+*.csv
+
+# VS Code
+.vscode/
